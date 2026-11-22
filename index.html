@@ -4,386 +4,540 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Школьное расписание</title>
-  <style>
-  /* Глубокий насыщенный фон на всю страницу WordPress */
-  body, .wp-site-blocks {
-    background-color: #0f172a !important;
-    background-image: 
-      radial-gradient(at 15% 10%, rgba(37, 99, 235, 0.45) 0px, transparent 50%),
-      radial-gradient(at 85% 15%, rgba(79, 70, 229, 0.45) 0px, transparent 50%),
-      radial-gradient(at 50% 90%, rgba(14, 165, 233, 0.25) 0px, transparent 60%),
-      linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%) !important;
-    background-attachment: fixed !important;
-    min-height: 100vh !important;
-  }
-  /* Полупрозрачный стеклянный контейнер блока расписания поверх темного фона */
-  .asc-wrapper {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    color: #1e293b !important;
-    width: 100% !important;
-    max-width: 1280px !important;
-    margin: 22px auto !important;
-    padding: 22px !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    border-radius: 24px !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35) !important;
-    box-sizing: border-box !important;
-  }
-  .asc-wrapper * { box-sizing: border-box !important; }
-  .asc-wrapper p:empty, .asc-wrapper > br, .day-card br { display: none !important; }
-  /* Контрастная шапка внутри блока */
-  .asc-header {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 14px !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    margin-bottom: 20px !important;
-    background: rgba(255, 255, 255, 0.95) !important;
-    padding: 14px 22px !important;
-    border-radius: 16px !important;
-    border: 1px solid rgba(255, 255, 255, 0.9) !important;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
-  }
-  .asc-title-group { display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 14px !important; }
-  .asc-header h2 { margin: 0 !important; padding: 0 !important; color: #0f172a !important; font-size: 20px !important; font-weight: 700 !important; border: none !important; line-height: 1.2 !important; }
-  .asc-tabs { display: inline-flex !important; background: #f1f5f9 !important; padding: 4px !important; border-radius: 10px !important; gap: 4px !important; }
-  .asc-tab { border: none !important; background: transparent !important; color: #475569 !important; padding: 6px 14px !important; font-size: 14px !important; font-weight: 600 !important; border-radius: 7px !important; cursor: pointer !important; line-height: 1.2 !important; }
-  .asc-tab.active { background: #2563eb !important; color: #ffffff !important; box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25) !important; }
-  .asc-controls label { display: flex !important; gap: 10px !important; align-items: center !important; color: #334155 !important; font-size: 14px !important; font-weight: 600 !important; margin: 0 !important; }
-  .asc-controls select { padding: 7px 14px !important; font-size: 15px !important; border-radius: 9px !important; border: 1px solid #cbd5e1 !important; background: #f8fafc !important; color: #0f172a !important; font-weight: 600 !important; cursor: pointer !important; min-width: 170px !important; }
-  .schedule-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)) !important; gap: 16px !important; align-items: stretch !important; }
-  /* Усиленная тень у белых карточек на темном фоне */
-  .day-card {
-    background: #ffffff !important;
-    border-radius: 16px !important;
-    padding: 0 16px 14px 16px !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.22) !important;
-    border: none !important;
-    overflow: hidden !important;
-  }
-  /* Яркий акцентный фон для сегодняшнего дня */
-  .day-card.is-today {
-    border: 2px solid #2563eb !important;
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.14) !important;
-  }
-  /* Красивый градиентный фон в названии дня недели */
-  .day-card h3 {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    margin: 0 -16px 10px -16px !important;
-    padding: 10px 16px !important;
-    background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%) !important;
-    color: #1e3a8a !important;
-    border-bottom: 1px solid #c7d2fe !important;
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    line-height: 1.2 !important;
-  }
-  .day-card.is-today h3 {
-    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
-    color: #ffffff !important;
-    border-bottom: none !important;
-  }
-  .day-card.is-today .today-badge {
-    background: rgba(255, 255, 255, 0.22) !important;
-    color: #ffffff !important;
-  }
-  .today-badge { background: #dbeafe !important; color: #1d4ed8 !important; font-size: 11px !important; font-weight: 700 !important; padding: 2px 8px !important; border-radius: 99px !important; text-transform: uppercase !important; }
-  .lesson-row { display: flex !important; align-items: flex-start !important; padding: 6px !important; margin: 0 -6px !important; border-bottom: 1px solid #f1f5f9 !important; gap: 8px !important; border-radius: 8px !important; }
-  .lesson-row:last-child { border-bottom: none !important; padding-bottom: 2px !important; }
-  .lesson-row.is-current { background: #ecfdf5 !important; border-bottom-color: transparent !important; box-shadow: inset 3px 0 0 #10b981 !important; }
-  .now-badge { display: inline-block !important; background: #10b981 !important; color: #fff !important; font-size: 10px !important; font-weight: 700 !important; padding: 1px 6px !important; border-radius: 4px !important; margin-left: 6px !important; vertical-align: middle !important; }
-  .lesson-num { width: 18px !important; flex-shrink: 0 !important; font-weight: 700 !important; color: #2563eb !important; font-size: 13.5px !important; line-height: 1.25 !important; }
-  .lesson-row.is-current .lesson-num { color: #059669 !important; }
-  .lesson-time { width: 76px !important; flex-shrink: 0 !important; color: #64748b !important; font-size: 11.5px !important; line-height: 1.3 !important; white-space: nowrap !important; }
-  .lesson-content { flex: 1 !important; min-width: 0 !important; }
-  .lesson-item { margin-bottom: 4px !important; line-height: 1.25 !important; }
-  .lesson-item:last-child { margin-bottom: 0 !important; }
-  .lesson-item strong { font-size: 13.5px !important; font-weight: 600 !important; color: #0f172a !important; }
-  .group-badge { display: inline-block !important; background: #eff6ff !important; color: #2563eb !important; font-size: 10.5px !important; font-weight: 600 !important; padding: 1px 5px !important; border-radius: 4px !important; margin-left: 5px !important; }
-  .meta { color: #64748b !important; font-size: 12px !important; display: block !important; margin-top: 2px !important; line-height: 1.2 !important; }
-  @media (max-width: 640px) { .asc-wrapper { padding: 12px !important; } .schedule-grid { grid-template-columns: 1fr !important; } .asc-controls, .asc-controls label { width: 100% !important; } .asc-controls select { flex: 1 !important; } }
-    /* Кнопка печати в шапке */
-  .asc-print-btn {
-    padding: 7px 14px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    border-radius: 9px !important;
-    border: 1px solid #cbd5e1 !important;
-    background: #ffffff !important;
-    color: #334155 !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    transition: all 0.15s ease !important;
-  }
-  .asc-print-btn:hover {
-    background: #f1f5f9 !important;
-    color: #0f172a !important;
-    border-color: #94a3b8 !important;
-  }
-  .asc-print-title {
-    display: none !important;
-  }
+    <style>
+    * { box-sizing: border-box; }
+     body {
+      margin: 0;
+      padding: 22px 18px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      /* Небесно-голубой фон в тональности образца с мягкой глубиной */
+      background: radial-gradient(circle at 20% 15%, #e0f2fe 0%, transparent 50%),
+                  radial-gradient(circle at 85% 85%, #93c5fd 0%, transparent 55%),
+                  linear-gradient(150deg, #bae6fd 0%, #a5d8f3 50%, #93c5fd 100%);
+      background-attachment: fixed;
+      color: #0f172a;
+      min-height: 100vh;
+    }
+    .asc-wrapper { max-width: 1320px; margin: 0 auto; }
 
-      /* Заголовок школы (скрыт на экране, виден только при печати на А4) */
-  .asc-school-name {
-    display: none !important;
-  }
+        /* Солидная, статусная темно-синяя шапка */
+    .asc-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
+      padding: 16px 26px;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(30, 58, 138, 0.6);
+      color: #ffffff;
+    }
+    .asc-title-group { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+    .asc-header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.2px;
+      color: #ffffff;
+      background: none;
+      -webkit-text-fill-color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
 
-  /* Адаптация и компактный вид для смартфонов */
-  @media (max-width: 640px) {
-    html, body, .wp-site-blocks { background-attachment: scroll !important; }
-    .asc-wrapper { padding: 10px !important; margin: 6px auto !important; border-radius: 14px !important; border: none !important; }
-    .asc-header { padding: 12px !important; gap: 10px !important; margin-bottom: 12px !important; border-radius: 12px !important; }
-    .asc-title-group { width: 100% !important; flex-direction: column !important; align-items: stretch !important; gap: 8px !important; }
-    .asc-header h2 { font-size: 18px !important; text-align: center !important; }
-    .asc-tabs { display: flex !important; width: 100% !important; }
-    .asc-tab { flex: 1 !important; text-align: center !important; padding: 7px 6px !important; font-size: 13px !important; }
-    .asc-controls { width: 100% !important; display: flex !important; gap: 8px !important; }
-    .asc-controls label { flex: 1 !important; min-width: 0 !important; gap: 6px !important; font-size: 13px !important; }
-    .asc-controls select { flex: 1 !important; min-width: 0 !important; width: 100% !important; padding: 7px 10px !important; font-size: 14px !important; }
-    .asc-print-btn { padding: 7px 10px !important; font-size: 13px !important; white-space: nowrap !important; }
-    .schedule-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
-    .day-card { border-radius: 12px !important; padding: 0 12px 10px 12px !important; }
-    .day-card h3 { margin: 0 -12px 6px -12px !important; padding: 8px 12px !important; font-size: 15px !important; }
-    .lesson-row { padding: 5px 4px !important; margin: 0 -4px !important; gap: 6px !important; }
-    .lesson-num { width: 16px !important; font-size: 13px !important; }
-    .lesson-time { width: 68px !important; font-size: 11px !important; }
-    .lesson-item strong { font-size: 13px !important; }
-    .meta { font-size: 11.5px !important; }
-  }
+    /* Переключатель вкладок на темном фоне */
+    .asc-tabs {
+      display: inline-flex;
+      background: rgba(15, 23, 42, 0.55);
+      padding: 4px;
+      border-radius: 11px;
+      gap: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+    }
+    .asc-tab {
+      border: none;
+      background: transparent;
+      color: #cbd5e1;
+      padding: 7px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .asc-tab:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
+    .asc-tab.active {
+      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(37, 99, 235, 0.5);
+    }
 
-  /* Специальные правила при печати и сохранении в PDF на А4 */
-  @media print {
-    @page { size: A4 landscape; margin: 8mm; }
-    html, body, .wp-site-blocks { background: #ffffff !important; background-image: none !important; min-height: auto !important; }
-    body * { visibility: hidden !important; }
-    #asc-app, #asc-app * { visibility: visible !important; }
-    #asc-app { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
-    .asc-wrapper { background: #ffffff !important; background-image: none !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
-    .asc-header { background: #ffffff !important; box-shadow: none !important; border: none !important; border-bottom: 2px solid #000000 !important; border-radius: 0 !important; padding: 0 0 6px 0 !important; margin-bottom: 10px !important; display: block !important; }
-    .asc-school-name { display: block !important; font-size: 13px !important; font-weight: 600 !important; color: #334155 !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; margin-bottom: 2px !important; }
-    .asc-header h2, .asc-print-title { font-size: 20px !important; color: #000000 !important; display: inline !important; }
-    .asc-tabs, .asc-controls, .today-badge, .now-badge { display: none !important; }
-    .schedule-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
-    .day-card { box-shadow: none !important; border: 1.5px solid #475569 !important; border-radius: 8px !important; padding: 0 9px 7px 9px !important; break-inside: avoid !important; page-break-inside: avoid !important; }
-    .day-card h3 { font-size: 15px !important; margin: 0 -9px 4px -9px !important; padding: 5px 9px !important; background: #f1f5f9 !important; border-bottom: 1.5px solid #000000 !important; color: #000000 !important; }
-    .lesson-row { padding: 3px 0 !important; margin: 0 !important; gap: 6px !important; background: transparent !important; box-shadow: none !important; border-bottom: 1px solid #cbd5e1 !important; }
-    .lesson-num { width: 16px !important; color: #000000 !important; font-size: 13px !important; font-weight: 700 !important; }
-    .lesson-time { width: 68px !important; color: #1e293b !important; font-size: 11px !important; }
-    .lesson-item strong { color: #000000 !important; font-size: 13.5px !important; font-weight: 700 !important; }
-    .meta { color: #1e293b !important; font-size: 11.5px !important; margin-top: 1px !important; }
-    .group-badge { border: 1px solid #64748b !important; background: transparent !important; color: #000000 !important; font-size: 10px !important; padding: 0 4px !important; }
-  }
-</style>
+    /* Выбор класса и кнопка печати */
+    .asc-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .asc-controls label { display: flex; gap: 9px; align-items: center; color: #e2e8f0; font-size: 14.5px; font-weight: 700; }
+    .asc-controls select {
+      padding: 7px 14px;
+      font-size: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 800;
+      cursor: pointer;
+      min-width: 175px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+    }
+    .asc-controls select:hover, .asc-controls select:focus {
+      outline: none;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.45);
+    }
+    .btn-print {
+      padding: 7px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+    .btn-print:hover {
+      background: rgba(255, 255, 255, 0.24);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.45);
+      transform: translateY(-1px);
+    }
 
-<div id="asc-app"></div>
+    .btn-print:hover {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #93c5fd;
+      transform: translateY(-1px);
+    }
+
+    /* Бодрые карточки дней недели */
+    .schedule-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; align-items: stretch; }
+    .day-card {
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.09), 0 2px 6px rgba(15, 23, 42, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .day-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 28px -4px rgba(15, 23, 42, 0.14);
+    }
+    .day-card.is-today {
+      border: 2px solid #2563eb;
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.2);
+    }
+    .day-card h3 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0;
+      padding: 12px 16px;
+      color: #ffffff;
+      font-size: 16.5px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Более сочные и бодрые градиенты заголовков */
+    .day-0 h3 { background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%); }
+    .day-1 h3 { background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); }
+    .day-2 h3 { background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); }
+    .day-3 h3 { background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%); }
+    .day-4 h3 { background: linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%); }
+    .day-5 h3 { background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%); }
+
+    .today-badge {
+      background: rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(4px);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 9px;
+      border-radius: 99px;
+      text-transform: uppercase;
+    }
+    .day-body { padding: 8px 14px 12px; background: linear-gradient(180deg, #ffffff 0%, #fafcff 100%); }
+    .lesson-row {
+      display: flex;
+      align-items: flex-start;
+      padding: 6px;
+      margin: 0 -6px;
+      border-bottom: 1px solid #e2e8f0;
+      gap: 8px;
+      border-radius: 9px;
+      transition: background 0.15s;
+    }
+    .lesson-row:hover { background: #f1f5f9; }
+    .lesson-row:last-child { border-bottom: none; padding-bottom: 2px; }
+    .lesson-row.is-current {
+      background: linear-gradient(90deg, #dcfce7 0%, #ecfdf5 100%);
+      border-bottom-color: transparent;
+      box-shadow: inset 3.5px 0 0 #10b981;
+    }
+    .now-badge {
+      display: inline-block;
+      background: #059669;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 5px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .lesson-num {
+      width: 20px;
+      flex-shrink: 0;
+      font-weight: 800;
+      color: #1d4ed8;
+      font-size: 14px;
+    }
+    .lesson-time { width: 76px; flex-shrink: 0; color: #475569; font-size: 11.5px; font-weight: 500; white-space: nowrap; }
+    .lesson-content { flex: 1; min-width: 0; }
+    .lesson-item { margin-bottom: 4px; line-height: 1.25; }
+    .lesson-item:last-child { margin-bottom: 0; }
+    .lesson-item strong { font-size: 13.8px; font-weight: 700; color: #0f172a; }
+    .group-badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 5px;
+      margin-left: 5px;
+    }
+    .meta { color: #64748b; font-size: 12px; display: block; margin-top: 2px; }
+
+    /* Адаптация под телефон */
+    @media (max-width: 640px) {
+      body { padding: 10px; }
+      .schedule-grid { grid-template-columns: 1fr; gap: 14px; }
+      .asc-controls, .asc-controls label { width: 100%; }
+      .asc-controls select { flex: 1; }
+    }
+
+    /* Печать на лист А4 */
+            .print-meta, .print-school, .print-title { display: none; }
+    @media print {
+      @page { size: A4 landscape; margin: 0; }
+      body { background: #fff !important; padding: 8mm 12mm !important; color: #000 !important; }
+      .asc-header, .today-badge, .now-badge { display: none !important; }
+      .print-meta {
+        display: block !important;
+        font-size: 11px;
+        color: #64748b !important;
+        text-align: left;
+        margin-bottom: 2px;
+      }
+      .print-school {
+        display: block !important;
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569 !important;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+      }
+      .print-title {
+        display: block !important;
+        font-size: 18px;
+        font-weight: 800;
+        color: #000 !important;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+      .schedule-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+      .day-card { background: #fff !important; box-shadow: none !important; border: 1px solid #94a3b8 !important; break-inside: avoid; }
+      .day-card h3 { background: #f1f5f9 !important; color: #000 !important; border-bottom: 1px solid #94a3b8; padding: 5px 10px; font-size: 14px; text-shadow: none !important; }
+      .day-body { background: #fff !important; padding: 4px 10px 6px; }
+      .lesson-row { background: transparent !important; box-shadow: none !important; padding: 2.5px 0; border-bottom: 1px solid #e2e8f0 !important; }
+      .lesson-item strong, .lesson-num { color: #000 !important; }
+      .lesson-time, .meta { color: #334155 !important; }
+    }
+
+
+        /* Кнопка переключения темы */
+    .btn-theme {
+      padding: 7px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+    .btn-theme:hover {
+      background: rgba(255, 255, 255, 0.24);
+      transform: translateY(-1px);
+    }
+
+    /* Тёмная тема (активируется классом dark-theme у body) */
+    body.dark-theme {
+      background: radial-gradient(circle at 20% 15%, #1e293b 0%, transparent 50%),
+                  linear-gradient(150deg, #0b1120 0%, #0f172a 50%, #172033 100%);
+      color: #f1f5f9;
+    }
+    body.dark-theme .asc-header {
+      background: linear-gradient(135deg, #090d16 0%, #162033 60%, #1e3a8a 100%);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    body.dark-theme .asc-controls select {
+      background: #1e293b;
+      color: #f8fafc;
+      border-color: #334155;
+    }
+    body.dark-theme .day-card {
+      background: #1e293b;
+      border-color: #334155;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+    body.dark-theme .day-body {
+      background: #1e293b;
+    }
+    body.dark-theme .lesson-row {
+      border-bottom-color: #293548;
+    }
+    body.dark-theme .lesson-row:hover {
+      background: rgba(51, 65, 85, 0.5);
+    }
+    body.dark-theme .lesson-row.is-current {
+      background: rgba(16, 185, 129, 0.15);
+      box-shadow: inset 3.5px 0 0 #10b981;
+    }
+    body.dark-theme .lesson-num {
+      color: #60a5fa;
+    }
+    body.dark-theme .lesson-time,
+    body.dark-theme .meta {
+      color: #94a3b8;
+    }
+    body.dark-theme .lesson-item strong {
+      color: #f8fafc;
+    }
+    body.dark-theme .group-badge {
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+    }
+
+  </style>
+
+</head>
+
+<body>
+<div class="asc-wrapper">
+  <div class="print-meta" id="printMeta"></div>
+  <div class="print-school" id="printSchool">МБОУ СОШ № 4</div>
+<div class="print-title" id="printTitle">Расписание уроков</div>
+  <div class="asc-header">
+    <div class="asc-title-group">
+      <h1 id="schoolTitle">Школьное расписание</h1>
+      <div class="asc-tabs">
+        <button type="button" class="asc-tab active" data-mode="class">Классы</button>
+        <button type="button" class="asc-tab" data-mode="teacher">Учителя</button>
+        <button type="button" class="asc-tab" data-mode="room">Кабинеты</button>
+      </div>
+    </div>
+    <div class="asc-controls">
+      <label><span id="selectLabel">Класс:</span></select></label>
+      <button type="button" class="btn-print" onclick="window.print()">Печать</button>
+      <button type="button" class="btn-theme" id="themeToggle" title="Сменить тему">🌙 Ночь</button>
+    </div>
+  </div>
+  <div id="scheduleContainer" class="schedule-grid">Загрузка расписания...</div>
+</div>
 
 <script>
-  (function () {
-      const XML_URL = './timetable.xml';
-      // Если в timetable.xml не указано название школы, впишите его сюда в кавычках (например: 'МБОУ СОШ № 1'):
-      const CUSTOM_SCHOOL_NAME = 'МБОУ СОШ № 4';
+window.onerror = function(msg, url, line) {
+  var c = document.getElementById('scheduleContainer');
+  if (c) c.innerHTML = '<p style="color:red;background:#fff;padding:12px;">Ошибка JS (стр. ' + line + '): ' + msg + '</p>';
+};
 
-      const app = document.getElementById('asc-app');
-      if (!app) return;
+(function() {
+  var labelEl = document.getElementById('selectLabel');
+  var containerEl = document.getElementById('scheduleContainer');
+  var schoolTitleEl = document.getElementById('schoolTitle');
+  var printTitleEl = document.getElementById('printTitle');
+  var tabs = document.querySelectorAll('.asc-tab');
+  var selectEl = document.getElementById('entitySelect');
 
-      const wrapper = document.createElement('div');
-      wrapper.className = 'asc-wrapper';
+  if (!selectEl && labelEl) {
+    selectEl = document.createElement('select');
+    selectEl.id = 'entitySelect';
+    labelEl.parentNode.appendChild(selectEl);
+  }
 
-      const header = document.createElement('div');
-      header.className = 'asc-header';
+  var mode = 'class';
+  var db = { school: '', periods: {}, bounds: {}, days: [], subjects: {}, teachers: {}, classes: {}, rooms: {}, groups: {}, lessons: {}, cards: [] };
 
-      const titleGroup = document.createElement('div');
-      titleGroup.className = 'asc-title-group';
+  function toMins(t) {
+    if (!t) return null;
+    var parts = t.split(':');
+    var h = Number(parts.at(0));
+    var m = Number(parts.at(1));
+    return !isNaN(h) && !isNaN(m) ? h * 60 + m : null;
+  }
 
-      const schoolNameEl = document.createElement('div');
-      schoolNameEl.className = 'asc-school-name';
-      titleGroup.appendChild(schoolNameEl);
-
-      const h2 = document.createElement('h2');
-      h2.textContent = 'Расписание';
-
-      const printTitle = document.createElement('span');
-      printTitle.className = 'asc-print-title';
-      h2.appendChild(printTitle);
-      titleGroup.appendChild(h2);
-
-
-    const tabsBox = document.createElement('div');
-    tabsBox.className = 'asc-tabs';
-    const tabDefs = [['class', 'Классы'], ['teacher', 'Учителя'], ['room', 'Кабинеты']];
-    const tabs = tabDefs.map(([mode, text], idx) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'asc-tab' + (idx === 0 ? ' active' : '');
-      btn.dataset.mode = mode;
-      btn.textContent = text;
-      tabsBox.appendChild(btn);
-      return btn;
-    });
-    titleGroup.appendChild(tabsBox);
-
-    const controls = document.createElement('div');
-    controls.className = 'asc-controls';
-    controls.style.display = 'flex';
-    controls.style.flexWrap = 'wrap';
-    controls.style.gap = '10px';
-    controls.style.alignItems = 'center';
-
-    const label = document.createElement('label');
-    const labelEl = document.createElement('span');
-    labelEl.className = 'asc-select-label';
-    labelEl.textContent = 'Класс:';
-    const selectEl = document.createElement('select');
-    selectEl.className = 'asc-entity-select';
-    label.append(labelEl, selectEl);
-
-    const printBtn = document.createElement('button');
-    printBtn.type = 'button';
-    printBtn.className = 'asc-print-btn';
-    printBtn.textContent = '🖨 Печать / PDF';
-    printBtn.addEventListener('click', () => {
-      const opt = selectEl.options[selectEl.selectedIndex];
-      printTitle.textContent = opt ? ' — ' + opt.textContent : '';
-      window.print();
-    });
-
-    controls.append(label, printBtn);
-    header.append(titleGroup, controls);
-
-    const containerEl = document.createElement('div');
-    containerEl.className = 'schedule-grid asc-schedule-container';
-    containerEl.textContent = 'Загрузка расписания...';
-
-    wrapper.append(header, containerEl);
-    app.appendChild(wrapper);
-
-    let currentMode = 'class';
-    const db = { periods: {}, periodBounds: {}, days: [], subjects: {}, teachers: {}, classes: {}, classrooms: {}, groups: {}, lessons: {}, cards: [] };
-
-    function toMins(t) {
-      if (!t) return null;
-      const [h, m] = t.split(':').map(Number);
-      return !isNaN(h) && !isNaN(m) ? h * 60 + m : null;
-    }
-
-    fetch(XML_URL + '?v=' + Date.now())
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
-      .then(buf => {
-        const txt = new TextDecoder('windows-1251').decode(buf).replace(/encoding=["']windows-1251["']/i, 'encoding="UTF-8"');
-        const xml = new DOMParser().parseFromString(txt, "text/xml");
-        if (xml.querySelector('parsererror')) throw new Error('Ошибка XML');
-        parseXml(xml);
-        tabs.forEach(btn => btn.addEventListener('click', () => {
-          tabs.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          switchMode(btn.dataset.mode);
-        }));
-        selectEl.addEventListener('change', e => render(e.target.value));
-        switchMode('class');
-        setInterval(() => render(selectEl.value), 60000);
-      })
-      .catch(err => { containerEl.innerHTML = '<p style="color:#dc2626;background:#fff;padding:12px;border-radius:8px;">Ошибка: ' + err.message + '</p>'; });
-
-    function parseXml(xml) {
-      const tt = xml.querySelector('timetable');
-      const xmlSchool = tt ? (tt.getAttribute('schoolname') || tt.getAttribute('name') || '') : '';
-      schoolNameEl.textContent = CUSTOM_SCHOOL_NAME || xmlSchool;
-      for (let el of xml.getElementsByTagName('period')) {
-        const p = el.getAttribute('period'), st = el.getAttribute('starttime'), et = el.getAttribute('endtime');
-        db.periods[p] = st + '–' + et;
-        db.periodBounds[p] = { start: toMins(st), end: toMins(et) };
-      }
-      for (let el of xml.getElementsByTagName('daysdef')) {
-        const m = el.getAttribute('days');
-        if (m && !m.includes(',') && (m.match(/1/g) || []).length === 1) db.days.push({ index: m.indexOf('1'), name: el.getAttribute('name') });
-      }
-      db.days.sort((a, b) => a.index - b.index);
-      for (let el of xml.getElementsByTagName('subject')) db.subjects[el.getAttribute('id')] = el.getAttribute('name');
-      for (let el of xml.getElementsByTagName('teacher')) db.teachers[el.getAttribute('id')] = el.getAttribute('short') || el.getAttribute('name');
-      for (let el of xml.getElementsByTagName('class')) db.classes[el.getAttribute('id')] = el.getAttribute('name');
-      for (let el of xml.getElementsByTagName('classroom')) db.classrooms[el.getAttribute('id')] = el.getAttribute('short') || el.getAttribute('name');
-      for (let el of xml.getElementsByTagName('group')) db.groups[el.getAttribute('id')] = el.getAttribute('name');
-      for (let el of xml.getElementsByTagName('lesson')) {
-        db.lessons[el.getAttribute('id')] = {
-          subjectId: el.getAttribute('subjectid'),
-          classIds: (el.getAttribute('classids') || '').split(',').filter(Boolean),
-          teacherIds: (el.getAttribute('teacherids') || '').split(',').filter(Boolean),
-          groupIds: (el.getAttribute('groupids') || '').split(',').filter(Boolean),
-          classroomIds: (el.getAttribute('classroomids') || '').split(',').filter(Boolean)
+  fetch('timetable.xml?v=' + Date.now())
+    .then(function(r) {
+      if (!r.ok) throw new Error('Файл timetable.xml не найден (HTTP ' + r.status + ')');
+      return r.arrayBuffer();
+    })
+    .then(function(buf) {
+      var txt = new TextDecoder('windows-1251').decode(buf).replace(/encoding=["']windows-1251["']/i, 'encoding="UTF-8"');
+      var xml = new DOMParser().parseFromString(txt, 'text/xml');
+      if (xml.querySelector('parsererror')) throw new Error('Неверная структура XML');
+      parse(xml);
+      if (db.school && schoolTitleEl) schoolTitleEl.textContent = db.school;
+      tabs.forEach(function(b) {
+        b.onclick = function() {
+          tabs.forEach(function(x) { x.classList.remove('active'); });
+          b.classList.add('active');
+          setMode(b.getAttribute('data-mode'));
         };
-      }
-      for (let el of xml.getElementsByTagName('card')) {
-        db.cards.push({ lessonId: el.getAttribute('lessonid'), period: el.getAttribute('period'), daysMask: el.getAttribute('days'), classroomIds: (el.getAttribute('classroomids') || '').split(',').filter(Boolean) });
-      }
-    }
-
-    function switchMode(mode) {
-      currentMode = mode;
-      const map = { class: [db.classes, 'Класс:'], teacher: [db.teachers, 'Учитель:'], room: [db.classrooms, 'Кабинет:'] };
-      const [source, label] = map[mode];
-      labelEl.textContent = label;
-      selectEl.innerHTML = '';
-      const sorted = Object.entries(source).sort(([, a], [, b]) => a.localeCompare(b, 'ru', { numeric: true }));
-      sorted.forEach(([id, name]) => {
-        const opt = document.createElement('option');
-        opt.value = id; opt.textContent = name; selectEl.appendChild(opt);
       });
-      if (sorted.length) { const [[firstId]] = sorted; render(firstId); }
-    }
+      selectEl.onchange = function() { render(selectEl.value); };
+      setMode('class');
+    })
+    .catch(function(e) {
+      containerEl.innerHTML = '<p style="color:red;background:#fff;padding:12px;">' + e.message + '</p>';
+    });
 
-    function render(entityId) {
-      containerEl.innerHTML = '';
-      const now = new Date();
-      const todayIndex = (now.getDay() + 6) % 7;
-      const nowMins = now.getHours() * 60 + now.getMinutes();
+  function parse(xml) {
+    var tt = xml.querySelector('timetable');
+    if (tt && tt.getAttribute('schoolname')) db.school = tt.getAttribute('schoolname');
+    Array.from(xml.getElementsByTagName('period')).forEach(function(el) {
+      var p = el.getAttribute('period'), st = el.getAttribute('starttime'), et = el.getAttribute('endtime');
+      db.periods[p] = st + '–' + et;
+      db.bounds[p] = { s: toMins(st), e: toMins(et) };
+    });
+    Array.from(xml.getElementsByTagName('daysdef')).forEach(function(el) {
+      var m = el.getAttribute('days');
+      if (m && m.indexOf(',') === -1 && (m.match(/1/g) || []).length === 1) db.days.push({ i: m.indexOf('1'), name: el.getAttribute('name') });
+    });
+    db.days.sort(function(a, b) { return a.i - b.i; });
+    Array.from(xml.getElementsByTagName('subject')).forEach(function(el) { db.subjects[el.getAttribute('id')] = el.getAttribute('name'); });
+    Array.from(xml.getElementsByTagName('teacher')).forEach(function(el) { db.teachers[el.getAttribute('id')] = el.getAttribute('short') || el.getAttribute('name'); });
+    Array.from(xml.getElementsByTagName('class')).forEach(function(el) { db.classes[el.getAttribute('id')] = el.getAttribute('name'); });
+    Array.from(xml.getElementsByTagName('classroom')).forEach(function(el) { db.rooms[el.getAttribute('id')] = el.getAttribute('short') || el.getAttribute('name'); });
+    Array.from(xml.getElementsByTagName('group')).forEach(function(el) { db.groups[el.getAttribute('id')] = el.getAttribute('name'); });
+    Array.from(xml.getElementsByTagName('lesson')).forEach(function(el) {
+      db.lessons[el.getAttribute('id')] = {
+        subj: el.getAttribute('subjectid'),
+        cls: (el.getAttribute('classids') || '').split(',').filter(Boolean),
+        teach: (el.getAttribute('teacherids') || '').split(',').filter(Boolean),
+        grp: (el.getAttribute('groupids') || '').split(',').filter(Boolean),
+        rm: (el.getAttribute('classroomids') || '').split(',').filter(Boolean)
+      };
+    });
+    Array.from(xml.getElementsByTagName('card')).forEach(function(el) {
+      db.cards.push({ lid: el.getAttribute('lessonid'), p: el.getAttribute('period'), m: el.getAttribute('days'), rm: (el.getAttribute('classroomids') || '').split(',').filter(Boolean) });
+    });
+  }
 
-      db.days.forEach(day => {
-        const isToday = day.index === todayIndex;
-        const cards = db.cards.filter(c => {
-          const l = db.lessons[c.lessonId];
-          if (!l || !c.daysMask || c.daysMask[day.index] !== '1') return false;
-          if (currentMode === 'class') return l.classIds.includes(entityId);
-          if (currentMode === 'teacher') return l.teacherIds.includes(entityId);
-          const rIds = c.classroomIds.length ? c.classroomIds : l.classroomIds;
-          return rIds.includes(entityId);
-        });
-        if (!cards.length) return;
+  function setMode(m) {
+    mode = m;
+    var src = m === 'teacher' ? db.teachers : m === 'room' ? db.rooms : db.classes;
+    if (labelEl) labelEl.textContent = m === 'teacher' ? 'Учитель:' : m === 'room' ? 'Кабинет:' : 'Класс:';
+    selectEl.innerHTML = '';
+    var list = Object.keys(src).map(function(id) { return { id: id, name: src[id] }; });
+    list.sort(function(a, b) { return a.name.localeCompare(b.name, 'ru', { numeric: true }); });
+    list.forEach(function(item) {
+      var o = document.createElement('option');
+      o.value = item.id; o.textContent = item.name; selectEl.appendChild(o);
+    });
+    var first = list.at(0);
+    if (first) render(first.id);
+  }
 
-        const byP = {};
-        cards.forEach(c => { (byP[c.period] = byP[c.period] || []).push(c); });
-        let rows = '';
-        Object.keys(byP).sort((a, b) => a - b).forEach(p => {
-          const b = db.periodBounds[p];
-          const isCurrent = isToday && b && b.start !== null && nowMins >= b.start && nowMins <= b.end;
-          const items = byP[p].map(c => {
-            const l = db.lessons[c.lessonId];
-            const subj = db.subjects[l.subjectId] || 'Предмет';
-            const cls = l.classIds.map(id => db.classes[id]).filter(Boolean).join(', ');
-            const teach = l.teacherIds.map(id => db.teachers[id]).filter(Boolean).join(', ');
-            const rIds = c.classroomIds.length ? c.classroomIds : l.classroomIds;
-            const rooms = rIds.map(id => db.classrooms[id]).filter(Boolean).join(', ');
-            const grps = l.groupIds.map(id => db.groups[id]).filter(g => g && g !== 'Весь класс').join(', ');
-            const badge = grps ? '<span class="group-badge">' + grps + '</span>' : '';
-            const metaArr = currentMode === 'class' ? [teach, rooms ? 'каб. ' + rooms : ''] : currentMode === 'teacher' ? [cls ? 'кл. ' + cls : '', rooms ? 'каб. ' + rooms : ''] : [cls ? 'кл. ' + cls : '', teach];
-            return '<div class="lesson-item"><strong>' + subj + '</strong>' + badge + '<span class="meta">' + metaArr.filter(Boolean).join(' • ') + '</span></div>';
-          }).join('');
-          const nowTag = isCurrent ? '<span class="now-badge">Идёт сейчас</span>' : '';
-          rows += '<div class="lesson-row' + (isCurrent ? ' is-current' : '') + '"><div class="lesson-num">' + p + '</div><div class="lesson-time">' + (db.periods[p] || '') + '</div><div class="lesson-content">' + items + nowTag + '</div></div>';
-        });
-        const el = document.createElement('div');
-        el.className = 'day-card' + (isToday ? ' is-today' : '');
-        el.innerHTML = '<h3><span>' + day.name + '</span>' + (isToday ? '<span class="today-badge">Сегодня</span>' : '') + '</h3>' + rows;
-        containerEl.appendChild(el);
+  function render(id) {
+    containerEl.innerHTML = '';
+    var selOpt = selectEl.options[selectEl.selectedIndex];
+    var selName = selOpt ? selOpt.textContent : '';
+    var mTitle = mode === 'class' ? 'Класс ' : mode === 'teacher' ? 'Учитель: ' : 'Кабинет ';
+        var printSchoolEl = document.getElementById('printSchool');
+    if (printSchoolEl && db.school) printSchoolEl.textContent = db.school;
+    if (printTitleEl) printTitleEl.textContent = 'Расписание уроков — ' + mTitle + selName;
+    var printMetaEl = document.getElementById('printMeta');
+    if (printMetaEl) printMetaEl.textContent = new Date().toLocaleDateString('ru-RU') + ' • Школьное расписание';
+
+
+
+    var now = new Date();
+    var today = (now.getDay() + 6) % 7;
+    var mins = now.getHours() * 60 + now.getMinutes();
+
+    db.days.forEach(function(day) {
+      var isToday = day.i === today;
+      var cards = db.cards.filter(function(c) {
+        var l = db.lessons[c.lid];
+        if (!l || !c.m || c.m.charAt(day.i) !== '1') return false;
+        if (mode === 'class') return l.cls.indexOf(id) !== -1;
+        if (mode === 'teacher') return l.teach.indexOf(id) !== -1;
+        var r = c.rm.length ? c.rm : l.rm;
+        return r.indexOf(id) !== -1;
       });
-    }
-  })();
+      if (!cards.length) return;
+
+      var byP = {};
+      cards.forEach(function(c) { (byP[c.p] = byP[c.p] || []).push(c); });
+      var rows = '';
+      Object.keys(byP).sort(function(a, b) { return Number(a) - Number(b); }).forEach(function(p) {
+        var b = db.bounds[p];
+        var cur = isToday && b && b.s !== null && mins >= b.s && mins <= b.e;
+        var items = byP[p].map(function(c) {
+          var l = db.lessons[c.lid];
+          var subj = db.subjects[l.subj] || 'Предмет';
+          var cls = l.cls.map(function(x) { return db.classes[x]; }).filter(Boolean).join(', ');
+          var tch = l.teach.map(function(x) { return db.teachers[x]; }).filter(Boolean).join(', ');
+          var rIds = c.rm.length ? c.rm : l.rm;
+          var rms = rIds.map(function(x) { return db.rooms[x]; }).filter(Boolean).join(', ');
+          var grps = l.grp.map(function(x) { return db.groups[x]; }).filter(function(g) { return g && g !== 'Весь класс'; }).join(', ');
+          var badge = grps ? '<span class="group-badge">' + grps + '</span>' : '';
+          var meta = mode === 'class' ? [tch, rms ? 'каб. ' + rms : ''] : mode === 'teacher' ? [cls ? 'кл. ' + cls : '', rms ? 'каб. ' + rms : ''] : [cls ? 'кл. ' + cls : '', tch];
+          return '<div class="lesson-item"><strong>' + subj + '</strong>' + badge + '<span class="meta">' + meta.filter(Boolean).join(' • ') + '</span></div>';
+        }).join('');
+        rows += '<div class="lesson-row' + (cur ? ' is-current' : '') + '"><div class="lesson-num">' + p + '</div><div class="lesson-time">' + (db.periods[p] || '') + '</div><div class="lesson-content">' + items + (cur ? '<span class="now-badge">Идёт сейчас</span>' : '') + '</div></div>';
+      });
+      var card = document.createElement('div');
+      card.className = 'day-card day-' + (day.i % 6) + (isToday ? ' is-today' : '');
+      card.innerHTML = '<h3><span>' + day.name + '</span>' + (isToday ? '<span class="today-badge">Сегодня</span>' : '') + '</h3><div class="day-body">' + rows + '</div>';
+      containerEl.appendChild(card);
+    });
+  }
+    var themeBtn = document.getElementById('themeToggle');
+  if (localStorage.getItem('asc_theme') === 'dark') {
+    document.body.classList.add('dark-theme');
+    if (themeBtn) themeBtn.textContent = '☀️ День';
+  }
+  if (themeBtn) {
+    themeBtn.onclick = function() {
+      var isDark = document.body.classList.toggle('dark-theme');
+      themeBtn.textContent = isDark ? '☀️ День' : '🌙 Ночь';
+      localStorage.setItem('asc_theme', isDark ? 'dark' : 'light');
+    };
+  }
+
+})();
 </script>
+</body>
+</html>
