@@ -15,7 +15,6 @@
       <period name="12" short="12" period="12" starttime="17:30" endtime="18:10"/>
       <period name="13" short="13" period="13" starttime="18:20" endtime="19:00"/>
    </periods>
-   <breaks options="canadd,export:silent" columns="break,name,short,starttime,endtime"/>
    <daysdefs options="canadd,export:silent" columns="id,days,name,short">
       <daysdef id="D68BF6A60561323E" name="В любой день" short="X" days="100000,010000,001000,000100,000010,000001"/>
       <daysdef id="30225D26C0FC90B9" name="Каждый день" short="E" days="111111"/>
@@ -1957,5 +1956,4 @@
       <card lessonid="CC46C94695FAB9D4" classroomids="DE7414E8CDDAE0AC" period="1" weeks="1" terms="1" days="000010"/>
       <card lessonid="2EE564A4B75934D4" classroomids="7CCE6DF074A135CD" period="8" weeks="1" terms="1" days="000010"/>
    </cards>
-   <classroomsupervisions options="canadd,export:silent" columns="classroomid,teacherid,day,week,term,period,break"/>
 </timetable>
