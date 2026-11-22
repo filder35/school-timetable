@@ -338,6 +338,26 @@
       background: rgba(59, 130, 246, 0.2);
       color: #93c5fd;
     }
+        /* Цветовая полоска и индикатор учителя */
+    .lesson-item {
+      padding-left: 8px;
+      border-left: 3.5px solid transparent;
+      border-radius: 3px;
+    }
+    .teacher-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+    }
+    @media print {
+      .lesson-item { border-left: none !important; padding-left: 0 !important; }
+      .teacher-dot { display: none !important; }
+    }
+
 
   </style>
 
@@ -436,7 +456,14 @@ window.onerror = function(msg, url, line) {
     });
     db.days.sort(function(a, b) { return a.i - b.i; });
     Array.from(xml.getElementsByTagName('subject')).forEach(function(el) { db.subjects[el.getAttribute('id')] = el.getAttribute('name'); });
-    Array.from(xml.getElementsByTagName('teacher')).forEach(function(el) { db.teachers[el.getAttribute('id')] = el.getAttribute('short') || el.getAttribute('name'); });
+        db.teacherColors = {};
+    Array.from(xml.getElementsByTagName('teacher')).forEach(function(el) {
+      var id = el.getAttribute('id');
+      db.teachers[id] = el.getAttribute('short') || el.getAttribute('name');
+      var col = el.getAttribute('color');
+      if (col) db.teacherColors[id] = col;
+    });
+
     Array.from(xml.getElementsByTagName('class')).forEach(function(el) { db.classes[el.getAttribute('id')] = el.getAttribute('name'); });
     Array.from(xml.getElementsByTagName('classroom')).forEach(function(el) { db.rooms[el.getAttribute('id')] = el.getAttribute('short') || el.getAttribute('name'); });
     Array.from(xml.getElementsByTagName('group')).forEach(function(el) { db.groups[el.getAttribute('id')] = el.getAttribute('name'); });
@@ -504,7 +531,7 @@ window.onerror = function(msg, url, line) {
       Object.keys(byP).sort(function(a, b) { return Number(a) - Number(b); }).forEach(function(p) {
         var b = db.bounds[p];
         var cur = isToday && b && b.s !== null && mins >= b.s && mins <= b.e;
-        var items = byP[p].map(function(c) {
+                var items = byP[p].map(function(c) {
           var l = db.lessons[c.lid];
           var subj = db.subjects[l.subj] || 'Предмет';
           var cls = l.cls.map(function(x) { return db.classes[x]; }).filter(Boolean).join(', ');
@@ -513,9 +540,18 @@ window.onerror = function(msg, url, line) {
           var rms = rIds.map(function(x) { return db.rooms[x]; }).filter(Boolean).join(', ');
           var grps = l.grp.map(function(x) { return db.groups[x]; }).filter(function(g) { return g && g !== 'Весь класс'; }).join(', ');
           var badge = grps ? '<span class="group-badge">' + grps + '</span>' : '';
-          var meta = mode === 'class' ? [tch, rms ? 'каб. ' + rms : ''] : mode === 'teacher' ? [cls ? 'кл. ' + cls : '', rms ? 'каб. ' + rms : ''] : [cls ? 'кл. ' + cls : '', tch];
-          return '<div class="lesson-item"><strong>' + subj + '</strong>' + badge + '<span class="meta">' + meta.filter(Boolean).join(' • ') + '</span></div>';
+
+          // Берем цвет первого учителя на уроке
+          var firstTchId = l.teach.at(0);
+          var tColor = firstTchId && db.teacherColors ? db.teacherColors[firstTchId] : '';
+          var borderStyle = tColor && mode !== 'teacher' ? ' style="border-left-color:' + tColor + ';"' : '';
+          var dotHtml = tColor && mode !== 'teacher' ? '<span class="teacher-dot" style="background:' + tColor + ';"></span>' : '';
+
+          var tchWithDot = tch ? dotHtml + tch : '';
+          var meta = mode === 'class' ? [tchWithDot, rms ? 'каб. ' + rms : ''] : mode === 'teacher' ? [cls ? 'кл. ' + cls : '', rms ? 'каб. ' + rms : ''] : [cls ? 'кл. ' + cls : '', tchWithDot];
+          return '<div class="lesson-item"' + borderStyle + '><strong>' + subj + '</strong>' + badge + '<span class="meta">' + meta.filter(Boolean).join(' • ') + '</span></div>';
         }).join('');
+
         rows += '<div class="lesson-row' + (cur ? ' is-current' : '') + '"><div class="lesson-num">' + p + '</div><div class="lesson-time">' + (db.periods[p] || '') + '</div><div class="lesson-content">' + items + (cur ? '<span class="now-badge">Идёт сейчас</span>' : '') + '</div></div>';
       });
       var card = document.createElement('div');
