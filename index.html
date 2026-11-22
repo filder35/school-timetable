@@ -357,7 +357,29 @@
       .lesson-item { border-left: none !important; padding-left: 0 !important; }
       .teacher-dot { display: none !important; }
     }
-
+        /* Бейдж 1-й и 2-й смены в шапке дня */
+    .day-badges {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .shift-badge {
+      background: rgba(15, 23, 42, 0.25);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      letter-spacing: 0.2px;
+    }
+    @media print {
+      .shift-badge {
+        background: transparent !important;
+        color: #334155 !important;
+        border: 1px solid #94a3b8 !important;
+      }
+    }
 
   </style>
 
@@ -554,9 +576,15 @@ window.onerror = function(msg, url, line) {
 
         rows += '<div class="lesson-row' + (cur ? ' is-current' : '') + '"><div class="lesson-num">' + p + '</div><div class="lesson-time">' + (db.periods[p] || '') + '</div><div class="lesson-content">' + items + (cur ? '<span class="now-badge">Идёт сейчас</span>' : '') + '</div></div>';
       });
+      var periodsNums = Object.keys(byP).map(Number);
+      var hasShift1 = periodsNums.some(function(n) { return n <= 6; });
+      var hasShift2 = periodsNums.some(function(n) { return n >= 7; });
+      var shiftText = hasShift1 && hasShift2 ? '1–2 смена' : hasShift2 ? '2 смена' : '1 смена';
+
       var card = document.createElement('div');
       card.className = 'day-card day-' + (day.i % 6) + (isToday ? ' is-today' : '');
-      card.innerHTML = '<h3><span>' + day.name + '</span>' + (isToday ? '<span class="today-badge">Сегодня</span>' : '') + '</h3><div class="day-body">' + rows + '</div>';
+      var badgesHtml = '<span class="day-badges"><span class="shift-badge">' + shiftText + '</span>' + (isToday ? '<span class="today-badge">Сегодня</span>' : '') + '</span>';
+      card.innerHTML = '<h3><span>' + day.name + '</span>' + badgesHtml + '</h3><div class="day-body">' + rows + '</div>';
       containerEl.appendChild(card);
     });
   }
